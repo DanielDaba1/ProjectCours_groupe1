@@ -1,0 +1,220 @@
+void connection(){
+       try {
+            String nom = jNom.getText().toString();
+            String pass = jPass.getText().toString();
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "select * from tGuichetier  where username = '"+nom+"' AND password = '"+pass+"'";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            if(rs.next()){
+                JOptionPane.showMessageDialog(null, "Connecte en tant que " + nomV +" "+prenomV);
+                Main1 m =new Main1();
+                m.setVisible(true);
+                this.setVisible(false);
+            }
+            else{
+               JOptionPane.showMessageDialog(null, "Erreur de connection");
+            }
+            con.close();
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.toString());
+        } 
+    }
+
+
+
+__________________jcalenda___________________________________
+ SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
+java.util.Date dt1;
+dt1 = jDate.getDate();
+String strDate = (String) sdf.format(jDate.getDate());
+
+pst.setString(3, strDate);
+           
+
+__________________insertion et autres__________________________
+void insertion() {
+         SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
+        java.util.Date dt1;
+        
+        dt1 = jDate.getDate();
+        String strDate = (String) sdf.format(jDate.getDate());
+        try {
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "insert into tClient (nom,prenom,dateNaissance, numerocarteidentite, refQuartier,refNumero) values (?,?,?,?,?,?)";
+            PreparedStatement pst = con.prepareStatement(sql);
+            pst.setString(1, jNom.getText());
+            pst.setString(2, jPrenom.getText());
+            pst.setString(3, strDate);
+            pst.setString(4, jCarte.getText());
+            pst.setString(5, jIdQuartier.getText());
+            pst.setString(6, jIdNumero.getText());
+            pst.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Enregistrement reussi !!!");
+            chargementTable();
+            con.close();
+        } catch (Exception e) {
+            int x;
+            JOptionPane.showMessageDialog(null, e.toString());
+        }
+    }
+    void chargementTable()
+    {
+        try {
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "select * from vTableClient";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            tClient.setModel(DbUtils.resultSetToTableModel(rs));
+            con.close();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.toString());
+        }
+    }
+    void supprimer() {
+        try {          
+            
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "delete from tClient where id=?";
+            PreparedStatement pst = con.prepareStatement(sql);
+            
+            pst.setInt(1, Integer.parseInt(tId.getText()));
+            pst.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Suppression reussie !!!");
+            con.close();
+            chargementTable();
+        } catch (Exception e) {
+            int x;
+            JOptionPane.showMessageDialog(null, e.toString());
+        }
+    }
+    void modification() {
+         SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
+        java.util.Date dt1;
+        
+        dt1 = jDate.getDate();
+        String strDate = (String) sdf.format(jDate.getDate());
+        try {          
+            
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "update tClient set nom=?,prenom=?,dateNaissance=?, numerocarteidentite=?,refQuartier =?,refNumero=?   where id=?";
+            PreparedStatement pst = con.prepareStatement(sql);
+            pst.setString(1, jNom.getText());
+            pst.setString(2, jPrenom.getText());
+            pst.setString(3, strDate);
+            pst.setString(4, jCarte.getText());
+            pst.setInt(5, Integer.parseInt(jIdQuartier.getText()));
+            pst.setInt(6, Integer.parseInt(jIdNumero.getText()));
+            pst.setInt(7, Integer.parseInt(tId.getText()));
+            pst.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Modification reussie !!!");
+            chargementTable();
+            con.close();
+            //chargementTable();
+        } catch (Exception e) {
+            int x;
+            JOptionPane.showMessageDialog(null, e.toString());
+        }
+    }
+    void selection_modifier() {
+        try {
+
+            int row = tClient.getSelectedRow();
+            String Table_click = (tClient.getModel().getValueAt(row, 0).toString());
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "select * from vTableClient where id = '" + Table_click + "'";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                String id = rs.getString("id");
+                String nom=rs.getString("nom");
+                String prenom = rs.getString("prenom");
+                String numcarte =rs.getString("numerocarteidentite");
+             
+                
+                
+                 
+               tId.setText(id);
+               jNom.setText(nom);
+               jPrenom.setText(prenom);
+               jCarte.setText(numcarte);
+               
+            } 
+            con.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e);
+        }
+    }
+    
+    void ChargerComboBoxQuartier() {
+        try {
+            
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "select designation from tQuartier";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                jQuartier.addItem(rs.getString("designation"));                 
+            } 
+            con.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e);
+        }
+    }
+
+
+    void getIDQuartier() {
+        try {           
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "select id from tQuartier where designation = '" + jQuartier.getSelectedItem() + "'";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                String id = rs.getString("id");               
+                jIdQuartier.setText(id);            
+               
+            } 
+            con.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e);
+        }
+    }
+    void ChargerComboBoxNumero() {
+        try {
+            
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "select designation from tNumero";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                jNumero.addItem(rs.getString("designation"));                 
+            } 
+            con.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e);
+        }
+    }
+
+
+    void getIDNumero() {
+        try {           
+            Connection con = DriverManager.getConnection(ClsConnexion.getConnection());
+            String sql = "select id from tNumero where designation = '" + jNumero.getSelectedItem() + "'";
+            PreparedStatement pst = con.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                String id = rs.getString("id");               
+                jIdNumero.setText(id);            
+               
+            } 
+            con.close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e);
+        }
+    }

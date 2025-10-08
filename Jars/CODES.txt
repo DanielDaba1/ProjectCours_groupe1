@@ -1,0 +1,106 @@
+package Connection;
+
+import java.sql.DriverManager;
+import javax.swing.JOptionPane;
+import java.sql.Connection;
+
+/**
+ *
+ * @author Ir. Saint Roger
+ */
+public class ClsConnection {
+
+    static java.sql.Connection con;
+
+    public static Connection connexion(){
+        try {
+            con = DriverManager.getConnection("jdbc:sqlserver://DESKTOP-FC6SET1\\SA;databaseName=VISIT_ISIG;username=sa;password=IrRoger");
+//            JOptionPane.showMessageDialog(null, "La connexion reussie avec succes!");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erreur de connexion" + e.getMessage());
+        }
+        return con; 
+    }
+//    public static void main(String[] args) {
+//        connexion();
+//
+//    }
+
+}
+
+
+CODE ETAT DES SORTIES
+
+public void listeSortiesParDate(JDateChooser date1, JDateChooser date2) {
+        try {
+            JasperDesign jd = JRXmlLoader.load("E:\\Mon_Tfc\\VisitIsig\\src\\Repports\\Sorties.jrxml");
+            String sql = "SELECT SORTIE.ID,VISITEUR.NOM+' '+VISITEUR.POSTNOM+' '+VISITEUR.PRENOM\n"
+                    + "AS VISITEUR,SORTIE.DATE,SORTIE.HEURE FROM SORTIE INNER JOIN \n"
+                    + "VISITEUR ON VISITEUR.ID=SORTIE.REF_VISITEUR  WHERE DATE BETWEEN'" + ((JTextField) date1.getDateEditor().getUiComponent()).getText() + "' and '" + ((JTextField) date2.getDateEditor().getUiComponent()).getText() + "' ORDER BY ID";
+            JRDesignQuery newQuery = new JRDesignQuery();
+            newQuery.setText(sql);
+            jd.setQuery(newQuery);
+            JasperReport jr = JasperCompileManager.compileReport(jd);
+            JasperPrint jp = JasperFillManager.fillReport(jr, null, connexion());
+            JasperViewer.viewReport(jp, false);
+        } catch (Exception exp) {
+            JOptionPane.showMessageDialog(null, "erreur d'impression" + exp.getMessage());
+            //alerteInformation("Message d'erreur", "erreur d'impresion"+exp.getMessage());
+        }
+    }
+
+    public void sorties() {
+        try {
+            JasperDesign jd = JRXmlLoader.load("E:\\Mon_Tfc\\VisitIsig\\src\\Repports\\Sorties.jrxml");
+            String sql = "SELECT SORTIE.ID,VISITEUR.NOM+' '+VISITEUR.POSTNOM+' '+VISITEUR.PRENOM\n"
+                    + "AS VISITEUR,SORTIE.DATE,SORTIE.HEURE FROM SORTIE INNER JOIN \n"
+                    + "VISITEUR ON VISITEUR.ID=SORTIE.REF_VISITEUR ORDER BY ID";
+            JRDesignQuery newQuery = new JRDesignQuery();
+            newQuery.setText(sql);
+            jd.setQuery(newQuery);
+            JasperReport jr = JasperCompileManager.compileReport(jd);
+            JasperPrint jp = JasperFillManager.fillReport(jr, null, Connection.ClsConnection.connexion());
+            JasperViewer.viewReport(jp, false);
+        } catch (Exception exp) {
+            JOptionPane.showMessageDialog(null, "Erreur d'impression" + exp.getMessage());
+            //alerteInformation("Message d'erreur", "erreur d'impresion"+exp.getMessage());
+        }
+    }
+
+    public void listVisiteBy1(JLabel ID) {
+        try {
+            JasperDesign jd = JRXmlLoader.load("E:\\Mon_Tfc\\VisitIsig\\src\\Repports\\ListVisites.jrxml");
+            String sql = "SELECT VISITE.ID,VISITE.MOTIF,VISITEUR.NOM+' '+VISITEUR.POSTNOM+' '+VISITEUR.POSTNOM+' '\n"
+                    + "+' '+VISITEUR.PRENOM AS VISITEUR,AGENT.NOM+' '+AGENT.POSTNOM+' '+\n"
+                    + "AGENT.PRENOM AS VISITE, VISITE.DATEV DATE,VISITE.HEURE FROM VISITE\n"
+                    + "INNER JOIN AGENT ON AGENT.ID=VISITE.REF_AGENT INNER JOIN VISITEUR \n"
+                    + "ON VISITEUR.ID=VISITE.REF_VISITEUR WHERE VISITE.ID='" + ID.getText() + "'";
+            JRDesignQuery newQuery = new JRDesignQuery();
+            newQuery.setText(sql);
+            jd.setQuery(newQuery);
+            JasperReport jr = JasperCompileManager.compileReport(jd);
+            JasperPrint jp = JasperFillManager.fillReport(jr, null, Connection.ClsConnection.connexion());
+            JasperViewer.viewReport(jp, false);
+        } catch (Exception exp) {
+            JOptionPane.showMessageDialog(null, "Erreur d'impression" + exp.getMessage());
+            //alerteInformation("Message d'erreur", "erreur d'impresion"+exp.getMessage());
+        }
+    }
+
+    public void Badge(JLabel ID) {
+        try {
+            JasperDesign jd = JRXmlLoader.load("E:\\Mon_Tfc\\VisitIsig\\src\\Repports\\Badge.jrxml");
+            String sql = "SELECT AGENT.ID,AGENT.NOM,AGENT.POSTNOM,AGENT.PRENOM,AGENT.SEXE,\n"
+                    + "AGENT.ADRESSE,AGENT.PHOTO, FONCTION.DESIGNATION FONCTION FROM AGENT\n"
+                    + "INNER JOIN FONCTION ON FONCTION.ID=AGENT.REF_FONCTION WHERE AGENT.ID='" + ID.getText() + "'";
+            JRDesignQuery newQuery = new JRDesignQuery();
+            newQuery.setText(sql);
+            jd.setQuery(newQuery);
+            JasperReport jr = JasperCompileManager.compileReport(jd);
+            JasperPrint jp = JasperFillManager.fillReport(jr, null, Connection.ClsConnection.connexion());
+            JasperViewer.viewReport(jp, false);
+        } catch (Exception exp) {
+            JOptionPane.showMessageDialog(null, "Erreur d'impression" + exp.getMessage());
+            //alerteInformation("Message d'erreur", "erreur d'impresion"+exp.getMessage());
+        }
+    }
